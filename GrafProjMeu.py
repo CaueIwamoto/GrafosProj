@@ -1,109 +1,112 @@
 import os
 
-#Primeira parte onde ele abre o archive "A.txt" (entrada a matriz "A" de adjacência) e lê:
+print("--------------- Grafos ---------------")
+#Primeira parte onde o programa abre o arquivo "A.txt" (entrada a matriz "A" de adjacência) e lê:
 def main():
     archive = open("A.txt", "r")
     dados = archive.readlines()
     archive.close()
     for n in range(len(dados)):
         dados[n] = dados[n].split()
-    #Utiliza o filtro "None" da lista para remover conteúdo vazio:
+    #Utiliza o filtro "None" da lista para remover algum conteúdo vazio:
     dados = list(filter(None, dados))
 
-    graus, existe, somatoria = SeqGraus(dados)
-    if not existe:
+    Grafoex, graus, somatoria = SequenciaGraus(dados)
+    if not Grafoex:
         exit()
 
-    #Variáveis (grafos):    
-    simples = GrafoSimples(dados)
-    grafoRegular(graus)
-    grafoCompleto(dados, simples)
+    #Variáveis (grafos):  
     Narestas(somatoria)
-    bipartido, x, y = GrafoBipartido(dados)
-    BipartidoCompleto(simples, bipartido, x, y)
-    
-#Verificação dos graus:     
-def SeqGraus(Matriz):
+    simples = grafoSimples(dados)  
+    grafoCompleto(dados, simples)
+    grafoRegular(graus)
+    bipartido, x, y = grafoBipartido(dados)
+    grafoBiparCompleto(simples, bipartido, x, y)
+
+#Sequencia dos graus:    
+def SequenciaGraus(matriz):
     graus = []
-    for linha in range(len(Matriz)):
+    for linha in range(len(matriz)):
         graus.append(0)
-        for coluna in range(len(Matriz)):
+        for coluna in range(len(matriz)):
             if linha == coluna:
-                graus[linha] += (int(Matriz[linha][coluna])*2)
+                graus[linha] += (int(matriz[linha][coluna])*2)
             else:
-                graus[linha] += int(Matriz[linha][coluna])
+                graus[linha] += int(matriz[linha][coluna])
 
     somatoria = 0
     for item in range(len(graus)):
         somatoria += graus[item]
 
     if somatoria % 2 == 1:
-        print("O grafo nao existe!")
+        print("O grafo nao existe.")
         return False, graus, somatoria
     else:
-        graus = decrescente(graus)
+        graus = ordemDecrescente(graus)
         print("Sequencia dos graus do grafo: ", end=" ")
         print(*graus, sep=", ")
         return True, graus, somatoria
 
-#Organizar os dados em ordem crescente e também inverter a lista:
-def decrescente(graus):
+#Organizar os dados em ordem crescente e tambehm inverter a lista:
+def ordemDecrescente(graus):
     graus = sorted(graus)
-    graus = graus[::-1] 
+    graus = graus[::-1]
     return graus
 
 
-#Def que faz a verificação dos números de arestas do grafo:
-def Narestas(somatoriaDeGraus):
-    arestas = somatoriaDeGraus/2
+#Função que faz a verificação dos números de arestas do grafo:
+def Narestas(somaDosGraus):
+    arestas = somaDosGraus/2
     print("Numero de arestas do grafo: ", int(arestas))
 
-#Função que averigua a existência de arestas/laços múltiplos:
-def VerificarLacos(Matriz):
+#Função que averigua a existência de laços/arestas múltiplas:
+def verificarLacos(matriz):
     lacos = []
-    ArestasMulti = []
+    arestasMultiplas = []
 
-    #Valores que se forem maior que 0, ele será um laço; Valores maior que 1, será aresta múltipla.
-    for linha in range(len(Matriz)):
-        for coluna in range(linha, len(Matriz)): 
-            if linha == coluna and int(Matriz[linha][coluna]) > 0: 
+    #Valores que se forem maior que 0, ele será um laço; Valores maior que 1, será aresta múltipla.:
+    for linha in range(len(matriz)):
+        for coluna in range(linha, len(matriz)):
+            if linha == coluna and int(matriz[linha][coluna]) > 0: 
                 lacos.append("v{0}".format (linha+1))
-            elif int(Matriz[linha][coluna]) > 1:
-                ArestasMulti.append("v{0} e v{1}".format (linha+1, coluna+1))
+            elif int(matriz[linha][coluna]) > 1:
+                arestasMultiplas.append("v{0} e v{1}".format (linha+1, coluna+1))
 
-    return lacos, ArestasMulti
+    return lacos, arestasMultiplas
 
 #Grafo simples:
-def GrafoSimples(Matriz):
-    lacos, ArestasMulti = VerificarLacos(Matriz)
-
-    if lacos and ArestasMulti:
-        print("O grafo eh simples? Nao.")
-        print("O grafo nao eh simples pois ele apresenta lacos e arestas multiplas.")
-        printLacos(lacos, ArestasMulti)
+def grafoSimples(matriz):
+    lacos, arestasMultiplas = verificarLacos(matriz)
+    
+    #Prints grafo simples:
+    if lacos and arestasMultiplas:
+        print("O grafo eh simples? R- Nao.")
+        print("O grafo nao eh simples pois apresenta ele lacos e arestas multiplas.")
+        screenshotLacos(lacos, arestasMultiplas)
         return False
 
-    #Verificar se o grafo tem laços ou arestas múltiplas: 
-    elif ArestasMulti or lacos:
-        if ArestasMulti: 
-            print("O grafo eh simples? Nao.")
-            print("O grafo nao eh simples pois ele apresenta arestas multiplas.")
+    #Averiguar se o grafo tem laços ou arestas múltiplas:
+    elif lacos or arestasMultiplas:
+        if lacos:
+            print("O grafo eh simples? R- Nao.")
+            print("O grafo nao eh simples pois apresenta lacos.")
 
-        if lacos: 
-            print("O grafo eh simples? Nao.")
-            print("O grafo nao eh simples pois ele apresenta lacos.")
+        if arestasMultiplas:
+            print("O grafo eh simples? R - Nao.")
+            print("O grafo nao eh simples pois apresenta arestas multiplas.")
 
-        printLacos(ArestasMulti, lacos)
+        screenshotLacos(lacos, arestasMultiplas)
         return False
     else:
-        print("O grafo eh simples? Sim.")
-        print("O grafo eh simples pois ele nao apresenta laços nem arestas multiplas.")
+        print("O grafo eh simples? R- Sim.")
+        print("O grafo eh simples pois ele nao apresenta lacos e arestas multiplas.")
         return True
+
 #Prints para ver se o grafo possui vértices com arestas múltiplas e/ou com laços:
-def printLacos (lacos, ArestasMulti):
-    if ArestasMulti:
+def screenshotLacos (lacos, arestasMultiplas):
+    if arestasMultiplas:
         print("Vertices com arestas multiplas: ", end=" ")
-        print(*ArestasMulti, sep=", ")
+        print(*arestasMultiplas, sep=", ")
     else:
         print("O grafo nao tem arestas multiplas.")
 
@@ -114,30 +117,31 @@ def printLacos (lacos, ArestasMulti):
         print("O grafo nao tem lacos.")
 
 #Grafo completo:
-def grafoCompleto(Matriz, simples):
+def grafoCompleto(matriz, simples):
+    #Se nao for simples, nao será completo:
     if not simples:
         completo = False
     else:
         completo = True
-        #Valores que se forem maior que 0, ele será um laço; Valores maior que 1, será aresta múltipla.
-        for linha in range(len(Matriz)):
-            for coluna in range(len(Matriz)):
-                if linha == coluna and int(Matriz[linha][coluna]) != 0: # Se o valor da célula for maior que 0 ela é um laço
+        #Valores que forem maior que 0, ele será um laço; Valores maior que 1, será aresta múltipla.:
+        for linha in range(len(matriz)):
+            for coluna in range(len(matriz)):
+                if linha == coluna and int(matriz[linha][coluna]) != 0:
                     completo = False
                     break
-                elif linha != coluna and int(Matriz[linha][coluna]) != 1: # Se o valor da célula for maior que 1 ela é aresta multipla
+                elif linha != coluna and int(matriz[linha][coluna]) != 1:
                     completo = False
                     break
     #Prints grafo completo:
     if completo:
-        print("O grafo eh completo? Sim.")
-        print("O grafo eh completo pois ele eh simples e cada vertice eh adjacente a todos os outros vertices.")
+        print("O grafo eh completo? R- Sim.")
+        print("O grafo eh completo por conta dele ser simples. E cada um de seus vertices sao adjacentes aos outros vertices.")
     else:
-        print("O grafo eh completo? Nao.")
+        print("O grafo eh completo? R- Nao.")
         if not simples:
-            print("O grafo nao eh completo por conta dele nao ser simples.")
+            print("O grafo nao eh completo pois nao eh simples.")
         else:
-            print("O grafo nao eh completo pois, apesar de ser simples, nem todos os vertices sao adjacentes a todos os outros vertices.")
+            print("O grafo nao eh completo. Apesar do grafo ser simples, nao sao todos os vertices que serao adjacentes aos outros vertices.")
 
 #Grafo regular:
 def grafoRegular(graus):
@@ -148,57 +152,63 @@ def grafoRegular(graus):
         else:
             regular = False
             break
+    
     #Prints grafo regular:
     if regular:
-        print("O grafo eh regular? Sim.")
-        print("O grafo eh regular pois todos os seus vertices possuem o mesmo grau.")
+        print("O grafo eh regular? R- Sim.")
+        print("O grafo eh regular porque todos os vertices possuem o mesmo grau.")
     else:
-        print("O grafo eh regular? Nao.")
-        print("O grafo nao eh regular pois nem todos os seus vertices possuem o mesmo grau.")
+        print("O grafo eh regular? R- Nao.")
+        print("O grafo nao eh regular porque nem todos os vertices possuem o mesmo grau.")
 
 #Grafo bipartido:
-def GrafoBipartido (Matriz):
+def grafoBipartido (matriz):
     x = [0]
     y = []
     bipartido2 = True
+    
     #Averiguar quando o grafo possuir laços:
-    for linha in range(len(Matriz)):
-        for coluna in range(len(Matriz)):
-            if linha in x and int(Matriz[linha][coluna]) != 0 and coluna not in y:
+    for linha in range(len(matriz)):
+        for coluna in range(len(matriz)):
+            if linha in x and int(matriz[linha][coluna]) != 0 and coluna not in y:
                 if coluna in x:
                     bipartido2 = False
                 else:
                     y.append(coluna)
-            elif linha in y and int(Matriz[linha][coluna]) != 0 and coluna not in x:
+            elif linha in y and int(matriz[linha][coluna]) != 0 and coluna not in x:
                 if coluna in y:
                     bipartido2 = False
                 else:
                     x.append(coluna)
-    if bipartido2: #Prints:
-        print("O grafo eh bipartido? Sim.")
-        print("O grafo eh bipartido porque os seus vertices podem ser divididos em dois conjuntos disjuntos.")
-        printbiparticao(x, y)
+    
+    #Prints grafo bipartido:
+    if bipartido2:
+        print("O grafo eh bipartido? R- Sim.")
+        print("O grafo eh bipartido porque os vertices podem ser divididos em dois conjuntos disjuntos.")
+        screenshotParteBiparticao(x, y)
         return True, x, y
     else:
-        print("O grafo eh bipartido? Nao.")
-        print("O grafo nao eh bipartido pois os seus vértices nao podem ser divididos em dois conjuntos disjuntos.")
+        print("O grafo eh bipartido? R- Nao.")
+        print("O grafo nao eh bipartido porque os vertices nao podem ser divididos em dois conjuntos disjuntos.")
         return False, False, False
 
 #Grafo bipartido completo:
-def BipartidoCompleto (simples, bipartido, x, y):
-    if simples and bipartido: #Prints:
-        print("O grafo eh bipartido completo? Sim.")
+def grafoBiparCompleto (simples, bipartido, x, y):
+    #Prints grafo bipartido completo:
+    if simples and bipartido:
+        print("O grafo eh bipartido completo? R- Sim.")
         print("O grafo eh bipartido completo pois ele eh simples e bipartido.")
-        printbiparticao(x, y)
+        screenshotParteBiparticao(x, y)
     else:
-        print("O grafo eh bipartido completo? Nao.")
+        print("O grafo eh bipartido completo? R- Nao.")
         if not bipartido:
             print("O grafo nao eh bipartido completo pois ele nao eh bipartido.")
         elif not simples:
-            print("O grafo nao eh bipartido completo pois, apesar de ser bipartido, ele nao eh simples.")
+            print("O grafo nao eh bipartido completo pois ele nao eh simples.")
+
 #Em caso afirmativo de grafo bipartido completo, bipartição do grafo:
-def printbiparticao (x, y):
-    print("Biparticao: ")
+def screenshotParteBiparticao (x, y):
+    print("Bipartição: ")
     print("X = {", end="")
     for v in x:
         if v == x[-1]:
